@@ -116,20 +116,6 @@ async function run() {
     console.log("respone-->",response.hits.hits)
 }
 
-//stream
-const stream = connection.query(
-  'SELECT * FROM disposecall'
-).stream();
-
-stream.on('data',async(d) => {
-   updateElastic(d)
-  console.log(d);
-});
-
-stream.on('end', () => {
-  // All rows have been received
-  connection.end();
-});
 
 
 //updating elastic 
@@ -163,10 +149,23 @@ const updateElastic = async(d)=>{
         console.log("Error", err);
       }
     );
+
+    //stream getiing data from sql
+const stream = connection.query(
+  'SELECT * FROM disposecall'
+).stream();
+
+stream.on('data',async(d) => {
+  await updateElastic(d)
+  console.log(d);
+});
+
+stream.on('end', () => {
+  // All rows have been received
+  connection.end();
+});
+
 }
-
-
-
 // :'26fe698a-c50d-4543-ae27-a20c45a46919'
 setTimeout(()=> {
   console.log("id-->", id)
